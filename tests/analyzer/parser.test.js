@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import path from 'node:path';
 import fs from 'node:fs';
 import { parseFileDependencies } from '../../src/analyzer/parser.js';
+import { normalizePath } from '../../src/utils/file-utils.js';
 
 describe('TypeScript AST Parser Edge Cases', () => {
   const rootDir = path.resolve('examples/instalite');
@@ -25,7 +26,7 @@ describe('TypeScript AST Parser Edge Cases', () => {
 
   it('parses CommonJS require() calls', () => {
     const fixturePath = path.join(tempDir, 'cjs.js');
-    const targetPath = path.join(tempDir, 'target.js');
+    const targetPath = normalizePath(path.join(tempDir, 'target.js'));
     fs.writeFileSync(targetPath, 'module.exports = {};');
     fs.writeFileSync(fixturePath, 'const t = require("./target.js");');
 
@@ -36,7 +37,7 @@ describe('TypeScript AST Parser Edge Cases', () => {
 
   it('parses dynamic import() string literals', () => {
     const fixturePath = path.join(tempDir, 'dyn.js');
-    const targetPath = path.join(tempDir, 'target.js');
+    const targetPath = normalizePath(path.join(tempDir, 'target.js'));
     fs.writeFileSync(fixturePath, 'async function run() { await import("./target.js"); }');
 
     const result = parseFileDependencies(fixturePath, tempDir);
@@ -55,7 +56,7 @@ describe('TypeScript AST Parser Edge Cases', () => {
 
   it('parses TypeScript type-only imports and re-exports', () => {
     const fixturePath = path.join(tempDir, 'reexport.ts');
-    const targetPath = path.join(tempDir, 'target.ts');
+    const targetPath = normalizePath(path.join(tempDir, 'target.ts'));
     fs.writeFileSync(targetPath, 'export interface User { id: string; }');
     fs.writeFileSync(fixturePath, 'export { User } from "./target.ts";');
 

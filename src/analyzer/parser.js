@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
-import { resolveImportPath } from '../utils/file-utils.js';
+import { resolveImportPath, normalizePath } from '../utils/file-utils.js';
 
 /**
  * Determines TypeScript ScriptKind based on file extension.
@@ -128,7 +128,7 @@ export function parseFileDependencies(filePath, rootDir) {
   walk(sourceFile);
 
   return {
-    filePath,
+    filePath: normalizePath(filePath),
     resolvedDependencies: Array.from(resolvedDependencies),
     rawImports,
     hasDynamicImports,

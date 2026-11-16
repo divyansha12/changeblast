@@ -54,6 +54,7 @@ export async function runAnalysis(options = {}) {
 
   // 3. Build the Dependency Graph using TypeScript AST
   const graph = new DependencyGraph();
+  const warnings = [];
 
   // Register all nodes
   for (const file of allFiles) {
@@ -62,9 +63,17 @@ export async function runAnalysis(options = {}) {
 
   // Parse dependencies for all files
   for (const file of allFiles) {
-    const { resolvedDependencies } = parseFileDependencies(file, rootDir);
+    const { resolvedDependencies, unsupportedPatterns } = parseFileDependencies(file, rootDir);
     for (const dep of resolvedDependencies) {
       graph.addDependency(file, dep);
+    }
+    if (unsupportedPatterns && unsupportedPatterns.length > 0) {
+      for (const pattern of unsupportedPatterns) {
+        warnings.push({
+          file: path.relative(rootDir, file),
+          warning: pattern
+        });
+      }
     }
   }
 
@@ -78,6 +87,7 @@ export async function runAnalysis(options = {}) {
 
   return {
     ...analysisResult,
+    warnings,
     config,
     rootDir
   };

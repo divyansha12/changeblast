@@ -68,6 +68,7 @@ export function parseFileDependencies(filePath, rootDir) {
 
   const rawImports = [];
   const resolvedDependencies = new Set();
+  const unsupportedPatterns = [];
   let hasDynamicImports = false;
 
   function handleSpecifier(specifier) {
@@ -97,15 +98,17 @@ export function parseFileDependencies(filePath, rootDir) {
 
     // 3. Dynamic Import or require() calls
     else if (ts.isCallExpression(node)) {
-      // Dynamic import: import('./foo')
+      // Dynamic import: import('./foo') or import(variable)
       if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
         hasDynamicImports = true;
         const arg = node.arguments[0];
         if (arg && ts.isStringLiteral(arg)) {
           handleSpecifier(arg.text);
+        } else {
+          unsupportedPatterns.push('Dynamic import with non-literal expression');
         }
       }
-      // CommonJS require: require('./foo')
+      // CommonJS require: require('./foo') or require(variable)
       else if (
         ts.isIdentifier(node.expression) &&
         node.expression.text === 'require'
@@ -113,6 +116,8 @@ export function parseFileDependencies(filePath, rootDir) {
         const arg = node.arguments[0];
         if (arg && ts.isStringLiteral(arg)) {
           handleSpecifier(arg.text);
+        } else if (arg) {
+          unsupportedPatterns.push('CommonJS require with non-literal expression');
         }
       }
     }
@@ -126,6 +131,7 @@ export function parseFileDependencies(filePath, rootDir) {
     filePath,
     resolvedDependencies: Array.from(resolvedDependencies),
     rawImports,
-    hasDynamicImports
+    hasDynamicImports,
+    unsupportedPatterns
   };
 }

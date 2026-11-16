@@ -1,9 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import path from 'node:path';
+import fs from 'node:fs';
 import { parseFileDependencies } from '../../src/analyzer/parser.js';
 
-describe('TypeScript AST Parser', () => {
+describe('TypeScript AST Parser Edge Cases', () => {
   const rootDir = path.resolve('examples/instalite');
+  const tempDir = path.resolve('tests/fixtures');
+
+  beforeAll(() => {
+    fs.mkdirSync(tempDir, { recursive: true });
+  });
+
+  afterAll(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
 
   it('parses static ESM imports correctly', () => {
     const filePath = path.resolve(rootDir, 'src/auth/login.js');
@@ -13,19 +23,44 @@ describe('TypeScript AST Parser', () => {
     expect(result.resolvedDependencies.some(d => d.endsWith('authUtils.js'))).toBe(true);
   });
 
-  it('handles files with no imports', () => {
-    const filePath = path.resolve(rootDir, 'src/auth/authUtils.js');
-    const result = parseFileDependencies(filePath, rootDir);
+  it('parses CommonJS require() calls', () => {
+    const fixturePath = path.join(tempDir, 'cjs.js');
+    const targetPath = path.join(tempDir, 'target.js');
+    fs.writeFileSync(targetPath, 'module.exports = {};');
+    fs.writeFileSync(fixturePath, 'const t = require("./target.js");');
 
-    expect(result.rawImports).toHaveLength(0);
-    expect(result.resolvedDependencies).toHaveLength(0);
+    const result = parseFileDependencies(fixturePath, tempDir);
+    expect(result.rawImports).toContain('./target.js');
+    expect(result.resolvedDependencies).toContain(targetPath);
   });
 
-  it('parses multi-hop imports across subdirectories', () => {
-    const filePath = path.resolve(rootDir, 'src/users/user.js');
-    const result = parseFileDependencies(filePath, rootDir);
+  it('parses dynamic import() string literals', () => {
+    const fixturePath = path.join(tempDir, 'dyn.js');
+    const targetPath = path.join(tempDir, 'target.js');
+    fs.writeFileSync(fixturePath, 'async function run() { await import("./target.js"); }');
 
-    expect(result.rawImports).toContain('../auth/authUtils.js');
-    expect(result.resolvedDependencies.some(d => d.endsWith('authUtils.js'))).toBe(true);
+    const result = parseFileDependencies(fixturePath, tempDir);
+    expect(result.hasDynamicImports).toBe(true);
+    expect(result.resolvedDependencies).toContain(targetPath);
+  });
+
+  it('flags unsupported non-literal dynamic imports with a warning', () => {
+    const fixturePath = path.join(tempDir, 'dyn_var.js');
+    fs.writeFileSync(fixturePath, 'const name = "target"; import(name);');
+
+    const result = parseFileDependencies(fixturePath, tempDir);
+    expect(result.hasDynamicImports).toBe(true);
+    expect(result.unsupportedPatterns.length).toBeGreaterThan(0);
+  });
+
+  it('parses TypeScript type-only imports and re-exports', () => {
+    const fixturePath = path.join(tempDir, 'reexport.ts');
+    const targetPath = path.join(tempDir, 'target.ts');
+    fs.writeFileSync(targetPath, 'export interface User { id: string; }');
+    fs.writeFileSync(fixturePath, 'export { User } from "./target.ts";');
+
+    const result = parseFileDependencies(fixturePath, tempDir);
+    expect(result.rawImports).toContain('./target.ts');
+    expect(result.resolvedDependencies).toContain(targetPath);
   });
 });

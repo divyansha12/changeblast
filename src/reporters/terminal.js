@@ -94,6 +94,15 @@ export function printTerminalReport(analysisResult, options = {}) {
     }
   }
 
+  // 6. Warnings Section (e.g. dynamic imports or non-literal expressions)
+  if (analysisResult.warnings && analysisResult.warnings.length > 0) {
+    console.log('\n' + chalk.bold.yellow('⚠️  STATIC ANALYSIS NOTICES'));
+    console.log(chalk.gray('─'.repeat(50)));
+    for (const item of analysisResult.warnings) {
+      console.log(`  ${chalk.yellow('!')} ${chalk.white(item.file)}: ${chalk.dim(item.warning)}`);
+    }
+  }
+
   console.log('\n' + chalk.gray('─'.repeat(50)));
   if (!options.explain && recommendedTests.length > 0) {
     console.log(chalk.dim('💡 Tip: Run with ') + chalk.cyan('--explain') + chalk.dim(' to inspect full dependency chains.'));

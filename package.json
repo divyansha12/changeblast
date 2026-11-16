@@ -7,6 +7,9 @@
     "changeblast": "./bin/changeblast.js"
   },
   "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
   "files": [
     "bin",
     "src",
@@ -31,6 +34,14 @@
   ],
   "author": "Divyanshu Singh",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/divyanshusingh/changeblast.git"
+  },
+  "bugs": {
+    "url": "https://github.com/divyanshusingh/changeblast/issues"
+  },
+  "homepage": "https://github.com/divyanshusingh/changeblast#readme",
   "engines": {
     "node": ">=18.0.0"
   },

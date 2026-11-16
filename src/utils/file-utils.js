@@ -9,7 +9,10 @@ const SUPPORTED_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs'];
  * @returns {string}
  */
 export function normalizePath(filePath) {
-  return filePath.replace(/\\/g, '/');
+  if (!filePath) return '';
+  // Strip surrounding quotes if present (e.g. from git quote-path output)
+  const unquoted = filePath.replace(/^["']|["']$/g, '');
+  return unquoted.replace(/\\/g, '/');
 }
 
 /**

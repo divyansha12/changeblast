@@ -168,7 +168,7 @@ export function getChangedFiles(options = {}) {
       }
 
       // Changes between base and working tree
-      const baseDiff = execSync(`git diff --name-status ${baseRef}`, {
+      const baseDiff = execSync(`git -c core.quotepath=false diff --name-status ${baseRef}`, {
         cwd,
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'ignore'],
@@ -176,7 +176,7 @@ export function getChangedFiles(options = {}) {
       addChanges(parseDiffOutput(baseDiff, gitRoot, cwd));
 
       // Also pick up untracked files
-      const porcelain = execSync('git status --porcelain', {
+      const porcelain = execSync('git -c core.quotepath=false status --porcelain', {
         cwd,
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'ignore'],
@@ -184,7 +184,7 @@ export function getChangedFiles(options = {}) {
       addChanges(parseUntrackedOutput(porcelain, gitRoot, cwd));
     } else if (options.stagedOnly) {
       // Only staged changes
-      const stagedDiff = execSync('git diff --cached --name-status', {
+      const stagedDiff = execSync('git -c core.quotepath=false diff --cached --name-status', {
         cwd,
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'ignore'],
@@ -192,21 +192,21 @@ export function getChangedFiles(options = {}) {
       addChanges(parseDiffOutput(stagedDiff, gitRoot, cwd));
     } else {
       // Default: Check working tree (both unstaged & staged) + untracked files
-      const unstagedDiff = execSync('git diff --name-status', {
+      const unstagedDiff = execSync('git -c core.quotepath=false diff --name-status', {
         cwd,
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'ignore'],
       });
       addChanges(parseDiffOutput(unstagedDiff, gitRoot, cwd));
 
-      const stagedDiff = execSync('git diff --cached --name-status', {
+      const stagedDiff = execSync('git -c core.quotepath=false diff --cached --name-status', {
         cwd,
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'ignore'],
       });
       addChanges(parseDiffOutput(stagedDiff, gitRoot, cwd));
 
-      const porcelain = execSync('git status --porcelain', {
+      const porcelain = execSync('git -c core.quotepath=false status --porcelain', {
         cwd,
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'ignore'],

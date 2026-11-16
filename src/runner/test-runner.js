@@ -85,10 +85,11 @@ export function executeTests(testFilePaths, options = {}) {
   console.log(chalk.dim(`$ ${command} ${args.join(' ')}\n`));
 
   return new Promise((resolve) => {
+    const isWindows = process.platform === 'win32';
     const child = spawn(command, args, {
       cwd: rootDir,
       stdio: 'inherit',
-      shell: true
+      shell: isWindows
     });
 
     child.on('close', (code) => {

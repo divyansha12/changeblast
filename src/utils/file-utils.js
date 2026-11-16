@@ -56,14 +56,14 @@ export function resolveImportPath(importingFilePath, importSpecifier, rootDir) {
 
   // 1. Direct exact file match
   if (fs.existsSync(targetPath) && fs.statSync(targetPath).isFile()) {
-    return targetPath;
+    return normalizePath(targetPath);
   }
 
   // 2. Try supported extensions
   for (const ext of SUPPORTED_EXTENSIONS) {
     const candidate = `${targetPath}${ext}`;
     if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
-      return candidate;
+      return normalizePath(candidate);
     }
   }
 
@@ -72,11 +72,11 @@ export function resolveImportPath(importingFilePath, importSpecifier, rootDir) {
   if (currentExt === '.js') {
     const tsCandidate = targetPath.slice(0, -3) + '.ts';
     if (fs.existsSync(tsCandidate) && fs.statSync(tsCandidate).isFile()) {
-      return tsCandidate;
+      return normalizePath(tsCandidate);
     }
     const tsxCandidate = targetPath.slice(0, -3) + '.tsx';
     if (fs.existsSync(tsxCandidate) && fs.statSync(tsxCandidate).isFile()) {
-      return tsxCandidate;
+      return normalizePath(tsxCandidate);
     }
   }
 
@@ -85,7 +85,7 @@ export function resolveImportPath(importingFilePath, importSpecifier, rootDir) {
     for (const ext of SUPPORTED_EXTENSIONS) {
       const indexCandidate = path.join(targetPath, `index${ext}`);
       if (fs.existsSync(indexCandidate) && fs.statSync(indexCandidate).isFile()) {
-        return indexCandidate;
+        return normalizePath(indexCandidate);
       }
     }
   }

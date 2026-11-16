@@ -1,3 +1,5 @@
+import { normalizePath } from '../utils/file-utils.js';
+
 /**
  * Bi-directional Dependency Graph.
  * 
@@ -26,10 +28,11 @@ export class DependencyGraph {
    * @param {string} file 
    */
   addNode(file) {
-    if (!this.nodes.has(file)) {
-      this.nodes.add(file);
-      this.dependencies.set(file, new Set());
-      this.dependents.set(file, new Set());
+    const norm = normalizePath(file);
+    if (!this.nodes.has(norm)) {
+      this.nodes.add(norm);
+      this.dependencies.set(norm, new Set());
+      this.dependents.set(norm, new Set());
     }
   }
 
@@ -41,11 +44,14 @@ export class DependencyGraph {
    * @param {string} toFile 
    */
   addDependency(fromFile, toFile) {
-    this.addNode(fromFile);
-    this.addNode(toFile);
+    const normFrom = normalizePath(fromFile);
+    const normTo = normalizePath(toFile);
 
-    this.dependencies.get(fromFile).add(toFile);
-    this.dependents.get(toFile).add(fromFile);
+    this.addNode(normFrom);
+    this.addNode(normTo);
+
+    this.dependencies.get(normFrom).add(normTo);
+    this.dependents.get(normTo).add(normFrom);
   }
 
   /**
@@ -54,7 +60,8 @@ export class DependencyGraph {
    * @returns {Set<string>}
    */
   getDependencies(file) {
-    return this.dependencies.get(file) || new Set();
+    const norm = normalizePath(file);
+    return this.dependencies.get(norm) || new Set();
   }
 
   /**
@@ -63,7 +70,8 @@ export class DependencyGraph {
    * @returns {Set<string>}
    */
   getDependents(file) {
-    return this.dependents.get(file) || new Set();
+    const norm = normalizePath(file);
+    return this.dependents.get(norm) || new Set();
   }
 
   /**
@@ -72,7 +80,7 @@ export class DependencyGraph {
    * @returns {boolean}
    */
   hasNode(file) {
-    return this.nodes.has(file);
+    return this.nodes.has(normalizePath(file));
   }
 
   /**

@@ -68,12 +68,13 @@ export function scanProject(rootDir, options = {}) {
       if (entry.isDirectory()) {
         traverse(fullPath);
       } else if (entry.isFile() && isSupportedSourceFile(fullPath)) {
-        allFiles.push(fullPath);
+        const normFullPath = normalizePath(fullPath);
+        allFiles.push(normFullPath);
 
         if (isTest(relativePath)) {
-          testFiles.push(fullPath);
+          testFiles.push(normFullPath);
         } else {
-          sourceFiles.push(fullPath);
+          sourceFiles.push(normFullPath);
         }
       }
     }

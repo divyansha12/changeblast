@@ -1,13 +1,14 @@
+import path from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { DependencyGraph } from '../../src/analyzer/dependency-graph.js';
 import { analyzeImpact } from '../../src/impact/impact-analyzer.js';
 
 describe('Impact Analyzer Unit & Edge Cases', () => {
-  const rootDir = '/mock/project';
+  const rootDir = path.resolve('mock-project');
 
   it('directly recommends modified test files', () => {
     const graph = new DependencyGraph();
-    const testFile = '/mock/project/tests/foo.test.js';
+    const testFile = path.resolve(rootDir, 'tests/foo.test.js');
     graph.addNode(testFile);
 
     const result = analyzeImpact({
@@ -24,8 +25,8 @@ describe('Impact Analyzer Unit & Edge Cases', () => {
 
   it('handles isolated modified files with no dependents gracefully', () => {
     const graph = new DependencyGraph();
-    const srcFile = '/mock/project/src/orphan.js';
-    const testFile = '/mock/project/tests/unrelated.test.js';
+    const srcFile = path.resolve(rootDir, 'src/orphan.js');
+    const testFile = path.resolve(rootDir, 'tests/unrelated.test.js');
 
     graph.addNode(srcFile);
     graph.addNode(testFile);
@@ -44,9 +45,9 @@ describe('Impact Analyzer Unit & Edge Cases', () => {
 
   it('terminates BFS cleanly in cyclic dependency chains', () => {
     const graph = new DependencyGraph();
-    const fileA = '/mock/project/src/a.js';
-    const fileB = '/mock/project/src/b.js';
-    const testA = '/mock/project/tests/a.test.js';
+    const fileA = path.resolve(rootDir, 'src/a.js');
+    const fileB = path.resolve(rootDir, 'src/b.js');
+    const testA = path.resolve(rootDir, 'tests/a.test.js');
 
     // Cycle: a <-> b
     graph.addDependency(fileA, fileB);

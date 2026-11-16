@@ -81,4 +81,4 @@ export default {
 
 ## License
 
-MIT © Divyanshu Singh
+MIT © Divyansha Singh

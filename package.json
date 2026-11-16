@@ -32,16 +32,16 @@
     "git",
     "cli"
   ],
-  "author": "Divyanshu Singh",
+  "author": "Divyansha Singh",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/divyanshusingh/changeblast.git"
+    "url": "https://github.com/divyansha12/changeblast.git"
   },
   "bugs": {
-    "url": "https://github.com/divyanshusingh/changeblast/issues"
+    "url": "https://github.com/divyansha12/changeblast/issues"
   },
-  "homepage": "https://github.com/divyanshusingh/changeblast#readme",
+  "homepage": "https://github.com/divyansha12/changeblast#readme",
   "engines": {
     "node": ">=18.0.0"
   },
